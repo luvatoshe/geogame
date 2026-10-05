@@ -44,18 +44,18 @@ jobs:
       - name: Package (Windows)
         if: matrix.os == 'windows-latest'
         run: |
-          jpackage --type msi --name "Geogame" --input target --main-jar ${{ steps.find-jar.outputs.jar }} --main-class org.springframework.boot.loader.launch.JarLauncher --app-version 1.0.0 --win-shortcut --win-menu --dest dist
+          jpackage --type msi --name "Geogame" --input target --main-jar ${{ steps.find-jar.outputs.jar }} --main-class org.springframework.boot.loader.launch.JarLauncher --app-version 1.0.0 --icon src/main/resources/icon.ico --win-shortcut --win-menu --dest dist
 
       - name: Package (macOS)
         if: matrix.os == 'macos-latest'
         run: |
-          jpackage --type dmg --name "Geogame" --input target --main-jar ${{ steps.find-jar.outputs.jar }} --main-class org.springframework.boot.loader.launch.JarLauncher --app-version 1.0.0 --dest dist
+          jpackage --type dmg --name "Geogame" --input target --main-jar ${{ steps.find-jar.outputs.jar }} --main-class org.springframework.boot.loader.launch.JarLauncher --app-version 1.0.0 --icon src/main/resources/icon.icns --dest dist
 
       - name: Package (Linux)
         if: matrix.os == 'ubuntu-latest'
         run: |
           sudo apt-get update && sudo apt-get install -y fakeroot
-          jpackage --type deb --name "geogame" --input target --main-jar ${{ steps.find-jar.outputs.jar }} --main-class org.springframework.boot.loader.launch.JarLauncher --app-version 1.0.0 --dest dist
+          jpackage --type deb --name "geogame" --input target --main-jar ${{ steps.find-jar.outputs.jar }} --main-class org.springframework.boot.loader.launch.JarLauncher --app-version 1.0.0 --icon src/main/resources/icon.png --dest dist
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
