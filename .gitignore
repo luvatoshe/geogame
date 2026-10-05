@@ -7,3 +7,6 @@ mvnw
 mvnw.cmd
 *.log
 .DS_Store
+map/
+*.iml
+amplicode.xml
