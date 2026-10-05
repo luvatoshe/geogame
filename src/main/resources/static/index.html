@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="ru">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Географический тест</title>
+        <link rel="stylesheet" href="/style.css" />
+        <link rel="stylesheet" href="/lib/jsvectormap.min.css" />
+    </head>
+    <body>
+        <div id="app">
+            <section id="screen-welcome" class="screen active">
+                <div class="welcome-container">
+                    <div class="welcome-rating">
+                        <div class="rating-badge" id="welcome-rank-icon">
+                            🌱
+                        </div>
+                        <div class="rating-info">
+                            <div
+                                class="rating-rank-name"
+                                id="welcome-rank-name"
+                            >
+                                Новичок
+                            </div>
+                            <div class="rating-points">
+                                <span id="welcome-rating">0</span> очков
+                            </div>
+                        </div>
+                    </div>
+
+                    <h1>Географический тест</h1>
+                    <p class="welcome-subtitle">
+                        Изучай мир играя: страны, флаги, столицы
+                    </p>
+
+                    <div class="welcome-features">
+                        <div class="feature">
+                            <div class="feature-icon">🌍</div>
+                            <div class="feature-text">
+                                <b>Изучение расположений</b>
+                                <span>195 стран в 19 уровнях</span>
+                            </div>
+                        </div>
+                        <div class="feature">
+                            <div class="feature-icon">🏆</div>
+                            <div class="feature-text">
+                                <b>Система медалей</b>
+                                <span
+                                    >Аметист, жемчуг, золото, серебро,
+                                    бронза</span
+                                >
+                            </div>
+                        </div>
+                        <div class="feature">
+                            <div class="feature-icon">📈</div>
+                            <div class="feature-text">
+                                <b>Рейтинг и ранги</b>
+                                <span>От новичка до легенды</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button
+                        class="btn btn-primary btn-lg welcome-play"
+                        onclick="showSections()"
+                    >
+                        Играть
+                    </button>
+                </div>
+            </section>
+
+            <section id="screen-sections" class="screen">
+                <header class="topbar">
+                    <button class="btn btn-back" onclick="showWelcome()">
+                        Назад
+                    </button>
+                    <h2>Выберите раздел</h2>
+                    <div class="topbar-spacer"></div>
+                </header>
+                <div class="sections-grid">
+                    <div
+                        class="section-card section-active"
+                        onclick="showLevels()"
+                    >
+                        <div class="section-icon">🌍</div>
+                        <h3>Страны</h3>
+                        <p>Изучение расположений стран на карте мира</p>
+                        <span class="section-badge">Доступно</span>
+                    </div>
+                    <div class="section-card section-locked">
+                        <div class="section-icon">🚩</div>
+                        <h3>Флаги</h3>
+                        <p>Изучение флагов стран мира</p>
+                        <span class="section-badge soon">Скоро</span>
+                    </div>
+                    <div class="section-card section-locked">
+                        <div class="section-icon">🏛️</div>
+                        <h3>Столицы</h3>
+                        <p>Изучение столиц и городов</p>
+                        <span class="section-badge soon">Скоро</span>
+                    </div>
+                </div>
+            </section>
+
+            <section id="screen-levels" class="screen">
+                <header class="topbar">
+                    <button class="btn btn-back" onclick="showSections()">
+                        Назад
+                    </button>
+                    <h2>Выберите уровень</h2>
+                    <div class="topbar-spacer"></div>
+                </header>
+                <div id="levels-grid" class="levels-grid"></div>
+            </section>
+
+            <section id="screen-lessons" class="screen">
+                <header class="topbar">
+                    <button class="btn btn-back" onclick="showLevels()">
+                        Назад
+                    </button>
+                    <h2 id="lessons-title">Уровень</h2>
+                    <div class="topbar-spacer"></div>
+                </header>
+                <div id="lessons-grid" class="lessons-grid"></div>
+            </section>
+
+            <section id="screen-game" class="screen">
+                <div class="game-wrapper">
+                    <header class="game-header">
+                        <div class="timer" id="timer">00:00,00</div>
+                        <div class="question">
+                            Найдите
+                            <span id="country-name" class="country-name"
+                                >...</span
+                            >
+                        </div>
+                        <div class="score">
+                            Очки: <span id="score-value">0</span>
+                        </div>
+                    </header>
+                    <div class="game-info">
+                        <span id="progress-text">Страна 1 из 20</span>
+                        <span class="live-score" id="live-score"
+                            >Потенциал: 10</span
+                        >
+                        <button
+                            class="btn btn-small btn-back"
+                            onclick="abortGame()"
+                        >
+                            Прервать
+                        </button>
+                    </div>
+                    <div id="map-container"></div>
+                    <div class="message" id="message"></div>
+                </div>
+            </section>
+
+            <section id="screen-stats" class="overlay-screen">
+                <div class="stats-container">
+                    <h1 class="stats-title" id="stats-title">Урок завершён</h1>
+                    <p class="stats-subtitle" id="stats-subtitle"></p>
+                    <div class="stats-main">
+                        <div class="stat-main-card">
+                            <div class="stat-main-value" id="stats-score">
+                                0 / 0
+                            </div>
+                            <div class="stat-main-label">Баллы</div>
+                        </div>
+                        <div class="stat-main-card">
+                            <div class="stat-main-value" id="stats-percent">
+                                0%
+                            </div>
+                            <div class="stat-main-label">Точность</div>
+                        </div>
+                        <div class="stat-main-card">
+                            <div class="stat-main-value" id="stats-time">
+                                00:00
+                            </div>
+                            <div class="stat-main-label">Время</div>
+                        </div>
+                    </div>
+                    <button
+                        class="btn btn-secondary btn-expand"
+                        id="btn-expand"
+                        onclick="toggleDetailedStats()"
+                    >
+                        📊 Подробная статистика
+                    </button>
+                    <div class="detailed-stats" id="detailed-stats">
+                        <div class="detailed-stats-header">
+                            Время по странам
+                        </div>
+                        <div
+                            class="detailed-stats-list"
+                            id="detailed-stats-list"
+                        ></div>
+                    </div>
+                    <button
+                        class="btn btn-primary btn-next-big"
+                        onclick="showRewardScreen()"
+                    >
+                        Далее
+                    </button>
+                </div>
+            </section>
+
+            <section id="screen-reward" class="overlay-screen">
+                <div class="reward-container">
+                    <div class="reward-rays" id="reward-rays"></div>
+                    <div class="reward-medal" id="reward-medal">
+                        <div class="reward-medal-icon" id="reward-medal-icon">
+                            🏆
+                        </div>
+                    </div>
+                    <h1 class="reward-title" id="reward-title">Награда</h1>
+                    <p class="reward-subtitle" id="reward-subtitle"></p>
+                    <div
+                        class="reward-bar-container"
+                        id="reward-bar-container"
+                    ></div>
+                    <div class="results-buttons">
+                        <button
+                            class="btn btn-secondary"
+                            onclick="retryLesson()"
+                        >
+                            Повторить
+                        </button>
+                        <button
+                            class="btn btn-primary"
+                            onclick="backToLevels()"
+                        >
+                            Далее
+                        </button>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <script src="/lib/jsvectormap.min.js"></script>
+        <script src="/lib/world.js"></script>
+        <script src="/script.js"></script>
+    </body>
+</html>
