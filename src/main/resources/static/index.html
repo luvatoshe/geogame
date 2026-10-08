@@ -75,29 +75,56 @@
                         Назад
                     </button>
                     <h2>Выберите раздел</h2>
-                    <div class="topbar-spacer"></div>
+                    <div class="rank-chip" id="sections-rank-chip">
+                        <span class="rank-chip-icon" id="sections-rank-icon"
+                            >🌱</span
+                        >
+                        <div class="rank-chip-info">
+                            <div class="rank-chip-name" id="sections-rank-name">
+                                Новичок
+                            </div>
+                            <div class="rank-chip-points">
+                                <span id="sections-rank-points">0</span> очков
+                            </div>
+                        </div>
+                    </div>
                 </header>
                 <div class="sections-grid">
                     <div
                         class="section-card section-active"
-                        onclick="showLevels()"
+                        onclick="
+                            setCurrentSection('countries');
+                            showLevels();
+                        "
                     >
                         <div class="section-icon">🌍</div>
                         <h3>Страны</h3>
                         <p>Изучение расположений стран на карте мира</p>
                         <span class="section-badge">Доступно</span>
                     </div>
-                    <div class="section-card section-locked">
+                    <div
+                        class="section-card section-active"
+                        onclick="
+                            setCurrentSection('flags');
+                            showLevels();
+                        "
+                    >
                         <div class="section-icon">🚩</div>
                         <h3>Флаги</h3>
-                        <p>Изучение флагов стран мира</p>
-                        <span class="section-badge soon">Скоро</span>
+                        <p>Угадай страну по флагу</p>
+                        <span class="section-badge">Доступно</span>
                     </div>
-                    <div class="section-card section-locked">
+                    <div
+                        class="section-card section-active"
+                        onclick="
+                            setCurrentSection('capitals');
+                            showLevels();
+                        "
+                    >
                         <div class="section-icon">🏛️</div>
                         <h3>Столицы</h3>
-                        <p>Изучение столиц и городов</p>
-                        <span class="section-badge soon">Скоро</span>
+                        <p>Угадай страну по столице</p>
+                        <span class="section-badge">Доступно</span>
                     </div>
                 </div>
             </section>
@@ -108,7 +135,19 @@
                         Назад
                     </button>
                     <h2>Выберите уровень</h2>
-                    <div class="topbar-spacer"></div>
+                    <div class="rank-chip" id="levels-rank-chip">
+                        <span class="rank-chip-icon" id="levels-rank-icon"
+                            >🌱</span
+                        >
+                        <div class="rank-chip-info">
+                            <div class="rank-chip-name" id="levels-rank-name">
+                                Новичок
+                            </div>
+                            <div class="rank-chip-points">
+                                <span id="levels-rank-points">0</span> очков
+                            </div>
+                        </div>
+                    </div>
                 </header>
                 <div id="levels-grid" class="levels-grid"></div>
             </section>
@@ -139,19 +178,142 @@
                         </div>
                     </header>
                     <div class="game-info">
-                        <span id="progress-text">Страна 1 из 20</span>
-                        <span class="live-score" id="live-score"
-                            >Потенциал: 10</span
-                        >
                         <button
                             class="btn btn-small btn-back"
                             onclick="abortGame()"
                         >
                             Прервать
                         </button>
+                        <span class="live-score" id="live-score"
+                            >Потенциал: 10</span
+                        >
+                        <span id="progress-text">1 / 20</span>
                     </div>
                     <div id="map-container"></div>
                     <div class="message" id="message"></div>
+                </div>
+            </section>
+
+            <section id="screen-flags-game" class="screen">
+                <div class="game-wrapper">
+                    <header class="game-header">
+                        <div class="timer" id="flags-timer">00:00,00</div>
+                        <div class="question">Какая это страна?</div>
+                        <div class="score">
+                            Очки: <span id="flags-score-value">0</span>
+                        </div>
+                    </header>
+                    <div class="game-info">
+                        <button
+                            class="btn btn-small btn-back"
+                            onclick="abortFlagsGame()"
+                        >
+                            Прервать
+                        </button>
+                        <span class="live-score" id="flags-live-score"
+                            >Потенциал: 10</span
+                        >
+                        <span id="flags-progress-text">1 / 20</span>
+                    </div>
+                    <div class="flag-display" id="flag-display">
+                        <img id="flag-image" src="" alt="" />
+                    </div>
+                    <div id="flag-test-options" class="test-options"></div>
+                    <form
+                        class="flag-input-block"
+                        onsubmit="
+                            event.preventDefault();
+                            submitFlagAnswer();
+                            return false;
+                        "
+                    >
+                        <div class="flag-input-wrap">
+                            <input
+                                type="text"
+                                id="flag-input"
+                                placeholder="Введите название страны..."
+                                autocomplete="off"
+                                spellcheck="false"
+                            />
+                            <div id="flag-hints" class="flag-hints"></div>
+                        </div>
+                        <button
+                            type="submit"
+                            class="btn btn-primary"
+                            id="flag-submit"
+                        >
+                            Проверить
+                        </button>
+                    </form>
+                    <div class="message" id="flags-message"></div>
+                </div>
+            </section>
+
+            <section id="screen-capitals-game" class="screen">
+                <div class="game-wrapper">
+                    <header class="game-header">
+                        <div class="timer" id="capitals-timer">00:00,00</div>
+                        <div class="question" id="capitals-question">
+                            Столица какой страны?
+                        </div>
+                        <div class="score">
+                            Очки: <span id="capitals-score-value">0</span>
+                        </div>
+                    </header>
+                    <div class="game-info">
+                        <button
+                            class="btn btn-small btn-back"
+                            onclick="abortCapitalsGame()"
+                        >
+                            Прервать
+                        </button>
+                        <span class="live-score" id="capitals-live-score"
+                            >Потенциал: 10</span
+                        >
+                        <span id="capitals-progress-text">1 / 20</span>
+                    </div>
+                    <div class="capital-display">
+                        <div
+                            class="capital-image-wrapper"
+                            id="capital-image-wrapper"
+                        >
+                            <img id="capital-image" src="" alt="" />
+                            <div
+                                class="capital-image-loader"
+                                id="capital-image-loader"
+                            >
+                                <div class="spinner"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="capital-test-options" class="test-options"></div>
+                    <form
+                        class="flag-input-block"
+                        onsubmit="
+                            event.preventDefault();
+                            submitCapitalAnswer();
+                            return false;
+                        "
+                    >
+                        <div class="flag-input-wrap">
+                            <input
+                                type="text"
+                                id="capital-input"
+                                placeholder="Введите название страны..."
+                                autocomplete="off"
+                                spellcheck="false"
+                            />
+                            <div id="capital-hints" class="flag-hints"></div>
+                        </div>
+                        <button
+                            type="submit"
+                            class="btn btn-primary"
+                            id="capital-submit"
+                        >
+                            Проверить
+                        </button>
+                    </form>
+                    <div class="message" id="capitals-message"></div>
                 </div>
             </section>
 
@@ -208,9 +370,10 @@
                 <div class="reward-container">
                     <div class="reward-rays" id="reward-rays"></div>
                     <div class="reward-medal" id="reward-medal">
-                        <div class="reward-medal-icon" id="reward-medal-icon">
-                            🏆
-                        </div>
+                        <div
+                            class="reward-medal-icon"
+                            id="reward-medal-icon"
+                        ></div>
                     </div>
                     <h1 class="reward-title" id="reward-title">Награда</h1>
                     <p class="reward-subtitle" id="reward-subtitle"></p>

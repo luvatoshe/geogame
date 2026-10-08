@@ -14,14 +14,15 @@ public class Country {
 
     private String name;
     private String isoCode;
+    private String capital;
     private int levelId;
 
-    public Country() {
-    }
+    public Country() {}
 
-    public Country(String name, String isoCode, int levelId) {
+    public Country(String name, String isoCode, String capital, int levelId) {
         this.name = name;
         this.isoCode = isoCode;
+        this.capital = capital;
         this.levelId = levelId;
     }
 
@@ -33,6 +34,9 @@ public class Country {
 
     public String getIsoCode() { return isoCode; }
     public void setIsoCode(String isoCode) { this.isoCode = isoCode; }
+
+    public String getCapital() { return capital; }
+    public void setCapital(String capital) { this.capital = capital; }
 
     public int getLevelId() { return levelId; }
     public void setLevelId(int levelId) { this.levelId = levelId; }

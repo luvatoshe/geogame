@@ -1,31 +1,56 @@
 package com.example.geogame;
 
+import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.scene.Scene;
+import javafx.scene.image.Image;
+import javafx.scene.web.WebEngine;
+import javafx.scene.web.WebView;
+import javafx.stage.Stage;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.core.env.Environment;
 
-import java.awt.Desktop;
-import java.net.URI;
+import java.io.InputStream;
 
 @SpringBootApplication
 public class GeogameApplication {
 
     public static void main(String[] args) {
-        ConfigurableApplicationContext ctx = SpringApplication.run(GeogameApplication.class, args);
-        openBrowser(ctx);
+        SpringApplication.run(GeogameApplication.class, args);
+        Application.launch(GameWindow.class, args);
     }
 
-    private static void openBrowser(ConfigurableApplicationContext ctx) {
-        try {
-            Environment env = ctx.getEnvironment();
-            String port = env.getProperty("server.port", "8081");
+    public static class GameWindow extends Application {
+
+        @Override
+        public void start(Stage stage) {
+            String port = System.getProperty("server.port", "8081");
             String url = "http://localhost:" + port;
-            if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
-                Desktop.getDesktop().browse(new URI(url));
-            }
-        } catch (Exception e) {
-            System.out.println("Откройте вручную: http://localhost:8081");
+
+            WebView webView = new WebView();
+            WebEngine engine = webView.getEngine();
+            engine.load(url);
+
+            Scene scene = new Scene(webView, 1280, 820);
+
+            stage.setTitle("Географический тест");
+            stage.setScene(scene);
+            stage.setMinWidth(900);
+            stage.setMinHeight(600);
+
+            try (InputStream icon = GeogameApplication.class.getResourceAsStream("/icon.png")) {
+                if (icon != null) {
+                    stage.getIcons().add(new Image(icon));
+                }
+            } catch (Exception ignored) {}
+
+            stage.setOnCloseRequest(e -> {
+                Platform.exit();
+                System.exit(0);
+            });
+
+            stage.show();
         }
     }
 }
