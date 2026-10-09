@@ -19,9 +19,13 @@ public class GameWindow extends Application {
     public void start(Stage stage) {
         new Thread(() -> {
             try {
+                System.setProperty("logging.file.name",
+                        System.getProperty("user.home") + "/geogame.log");
                 SpringApplication.run(GeogameApplication.class, new String[0]);
-            } catch (Exception e) {
-                e.printStackTrace();
+                System.out.println(">>> Spring Boot started successfully");
+            } catch (Throwable t) {
+                System.out.println(">>> Spring Boot FAILED: " + t.getMessage());
+                t.printStackTrace();
             }
         }, "spring-boot").start();
 
