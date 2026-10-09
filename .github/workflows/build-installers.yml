@@ -44,10 +44,12 @@ jobs:
           echo "jar=$JAR_NAME" >> $GITHUB_OUTPUT
           echo "Found: $JAR_NAME"
 
-      - name: Copy JavaFX modules
+      - name: Prepare input and JavaFX modules
         shell: bash
         run: |
+          mkdir -p target/app-input
           mkdir -p target/javafx
+          cp target/${{ steps.find-jar.outputs.jar }} target/app-input/
           if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
             find ~/.m2/repository/org/openjfx -name "*-win.jar" -exec cp {} target/javafx/ \;
           elif [[ "${{ matrix.os }}" == "macos-latest" ]]; then
@@ -55,23 +57,26 @@ jobs:
           else
             find ~/.m2/repository/org/openjfx -name "*-linux.jar" -exec cp {} target/javafx/ \;
           fi
+          echo "=== app-input ==="
+          ls -la target/app-input/
+          echo "=== javafx ==="
           ls -la target/javafx/
 
       - name: Package (Windows)
         if: matrix.os == 'windows-latest'
         run: |
-          jpackage --type msi --name "Geogame" --input target --main-jar ${{ steps.find-jar.outputs.jar }} --main-class com.example.geogame.Launcher --module-path target/javafx --add-modules javafx.controls,javafx.web,javafx.graphics,javafx.base,javafx.media --app-version 1.0.0 --icon src/main/resources/icon.ico --win-shortcut --win-menu --dest dist
+          jpackage --type msi --name "Geogame" --input target/app-input --main-jar ${{ steps.find-jar.outputs.jar }} --main-class com.example.geogame.Launcher --module-path target/javafx --add-modules javafx.controls,javafx.web,javafx.graphics,javafx.base,javafx.media --app-version 1.0.0 --icon src/main/resources/icon.ico --win-shortcut --win-menu --dest dist
 
       - name: Package (macOS)
         if: matrix.os == 'macos-latest'
         run: |
-          jpackage --type dmg --name "Geogame" --input target --main-jar ${{ steps.find-jar.outputs.jar }} --main-class com.example.geogame.Launcher --module-path target/javafx --add-modules javafx.controls,javafx.web,javafx.graphics,javafx.base,javafx.media --app-version 1.0.0 --icon src/main/resources/icon.icns --dest dist
+          jpackage --type dmg --name "Geogame" --input target/app-input --main-jar ${{ steps.find-jar.outputs.jar }} --main-class com.example.geogame.Launcher --module-path target/javafx --add-modules javafx.controls,javafx.web,javafx.graphics,javafx.base,javafx.media --app-version 1.0.0 --icon src/main/resources/icon.icns --dest dist
 
       - name: Package (Linux)
         if: matrix.os == 'ubuntu-latest'
         run: |
           sudo apt-get update && sudo apt-get install -y fakeroot
-          jpackage --type deb --name "geogame" --input target --main-jar ${{ steps.find-jar.outputs.jar }} --main-class com.example.geogame.Launcher --module-path target/javafx --add-modules javafx.controls,javafx.web,javafx.graphics,javafx.base,javafx.media --app-version 1.0.0 --icon src/main/resources/icon.png --dest dist
+          jpackage --type deb --name "geogame" --input target/app-input --main-jar ${{ steps.find-jar.outputs.jar }} --main-class com.example.geogame.Launcher --module-path target/javafx --add-modules javafx.controls,javafx.web,javafx.graphics,javafx.base,javafx.media --app-version 1.0.0 --icon src/main/resources/icon.png --dest dist
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
