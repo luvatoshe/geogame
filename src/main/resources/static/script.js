@@ -1179,7 +1179,8 @@ const flagsGame = {
 };
 
 function getFlagUrl(iso) {
-    return `https://flagcdn.com/${iso.toLowerCase()}.svg`;
+    const realUrl = `https://flagcdn.com/w320/${iso.toLowerCase()}.png`;
+    return `/api/proxy-image?url=${encodeURIComponent(realUrl)}`;
 }
 
 async function startFlagsLesson(level, lessonType) {
@@ -1799,21 +1800,29 @@ async function showNextCapital() {
 }
 
 async function loadCityImage(cityName) {
+    // Шаг 1: запрос к Wikipedia API
     const sources = [
         `https://ru.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(cityName)}?redirect=true`,
         `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(cityName)}?redirect=true`,
     ];
 
-    for (const url of sources) {
+    // Пробуем сначала русскую, потом английскую
+    for (const apiUrl of sources) {
         try {
-            const res = await fetch(url);
+            const res = await fetch(apiUrl);
             if (!res.ok) continue;
             const data = await res.json();
-            if (data.originalimage && data.originalimage.source) {
-                return data.originalimage.source;
-            }
+
+            let imageUrl = null;
             if (data.thumbnail && data.thumbnail.source) {
-                return data.thumbnail.source;
+                imageUrl = data.thumbnail.source;
+            } else if (data.originalimage && data.originalimage.source) {
+                imageUrl = data.originalimage.source;
+            }
+
+            if (imageUrl) {
+                // Шаг 2: заворачиваем URL в прокси
+                return `/api/proxy-image?url=${encodeURIComponent(imageUrl)}`;
             }
         } catch (e) {
             /* пробуем следующий источник */
