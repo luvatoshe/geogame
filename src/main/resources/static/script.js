@@ -1179,8 +1179,7 @@ const flagsGame = {
 };
 
 function getFlagUrl(iso) {
-    const realUrl = `https://flagcdn.com/w320/${iso.toLowerCase()}.png`;
-    return `/api/proxy-image?url=${encodeURIComponent(realUrl)}`;
+    return `/flags/${iso.toLowerCase()}.png`;
 }
 
 async function startFlagsLesson(level, lessonType) {
@@ -1683,24 +1682,19 @@ async function showNextCapital() {
     const loader = document.getElementById("capital-image-loader");
     img.classList.remove("loaded");
     loader.classList.remove("hidden");
+    loader.innerHTML = '<div class="spinner"></div>';
     img.src = "";
 
-    loadCityImage(capitalsGame.currentCountry.capital).then((url) => {
-        if (url) {
-            img.onload = () => {
-                img.classList.add("loaded");
-                loader.classList.add("hidden");
-            };
-            img.onerror = () => {
-                loader.innerHTML =
-                    '<span style="color:#a0a0b8;font-size:14px;">Фото недоступно</span>';
-            };
-            img.src = url;
-        } else {
-            loader.innerHTML =
-                '<span style="color:#a0a0b8;font-size:14px;">Фото недоступно</span>';
-        }
-    });
+    const url = loadCityImage(capitalsGame.currentCountry.isoCode);
+    img.onload = () => {
+        img.classList.add("loaded");
+        loader.classList.add("hidden");
+    };
+    img.onerror = () => {
+        loader.innerHTML =
+            '<span style="color:#a0a0b8;font-size:14px;">Фото недоступно</span>';
+    };
+    img.src = url;
 
     const inputBlock = document.querySelector(
         "#screen-capitals-game .flag-input-block",
@@ -1799,36 +1793,8 @@ async function showNextCapital() {
     startCapitalsTick();
 }
 
-async function loadCityImage(cityName) {
-    // Шаг 1: запрос к Wikipedia API
-    const sources = [
-        `https://ru.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(cityName)}?redirect=true`,
-        `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(cityName)}?redirect=true`,
-    ];
-
-    // Пробуем сначала русскую, потом английскую
-    for (const apiUrl of sources) {
-        try {
-            const res = await fetch(apiUrl);
-            if (!res.ok) continue;
-            const data = await res.json();
-
-            let imageUrl = null;
-            if (data.thumbnail && data.thumbnail.source) {
-                imageUrl = data.thumbnail.source;
-            } else if (data.originalimage && data.originalimage.source) {
-                imageUrl = data.originalimage.source;
-            }
-
-            if (imageUrl) {
-                // Шаг 2: заворачиваем URL в прокси
-                return `/api/proxy-image?url=${encodeURIComponent(imageUrl)}`;
-            }
-        } catch (e) {
-            /* пробуем следующий источник */
-        }
-    }
-    return null;
+function loadCityImage(isoCode) {
+    return `/capitals/${isoCode.toLowerCase()}.jpg`;
 }
 
 function startCapitalsTick() {
