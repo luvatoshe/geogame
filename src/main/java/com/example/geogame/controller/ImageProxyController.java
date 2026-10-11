@@ -6,41 +6,54 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.io.InputStream;
-import java.net.HttpURLConnection;
 import java.net.URI;
-import java.net.URL;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.time.Duration;
 
 @RestController
 public class ImageProxyController {
 
+    private final HttpClient httpClient = HttpClient.newBuilder()
+            .connectTimeout(Duration.ofSeconds(10))
+            .followRedirects(HttpClient.Redirect.NORMAL)
+            .build();
+
     @GetMapping("/api/proxy-image")
     public ResponseEntity<byte[]> proxyImage(@RequestParam("url") String url) {
         try {
-            URL target = URI.create(url).toURL();
-            HttpURLConnection conn = (HttpURLConnection) target.openConnection();
-            conn.setRequestProperty("User-Agent",
-                    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 " +
-                            "(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36");
-            conn.setConnectTimeout(5000);
-            conn.setReadTimeout(10000);
-            conn.setInstanceFollowRedirects(true);
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(url))
+                    .timeout(Duration.ofSeconds(15))
+                    .header("User-Agent",
+                            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) " +
+                                    "AppleWebKit/537.36 (KHTML, like Gecko) " +
+                                    "Chrome/120.0.0.0 Safari/537.36")
+                    .header("Accept", "image/*")
+                    .GET()
+                    .build();
 
-            int code = conn.getResponseCode();
-            if (code != 200) {
+            HttpResponse<byte[]> response = httpClient.send(request,
+                    HttpResponse.BodyHandlers.ofByteArray());
+
+            System.out.println(">>> proxy-image status=" + response.statusCode() + " url=" + url);
+
+            if (response.statusCode() != 200) {
                 return ResponseEntity.notFound().build();
             }
 
-            String contentType = conn.getContentType();
-            if (contentType == null) contentType = "image/jpeg";
+            String contentType = response.headers()
+                    .firstValue("content-type")
+                    .orElse("image/png");
 
-            try (InputStream in = conn.getInputStream()) {
-                byte[] bytes = in.readAllBytes();
-                return ResponseEntity.ok()
-                        .contentType(MediaType.parseMediaType(contentType))
-                        .body(bytes);
-            }
+            return ResponseEntity.ok()
+                    .contentType(MediaType.parseMediaType(contentType))
+                    .body(response.body());
+
         } catch (Exception e) {
+            System.out.println(">>> proxy-image FAILED: " + e.getClass().getName() + ": " + e.getMessage());
+            e.printStackTrace();
             return ResponseEntity.notFound().build();
         }
     }
